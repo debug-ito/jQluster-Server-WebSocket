@@ -117,7 +117,7 @@ Then, in your JavaScript code
 
 =head1 DESCRIPTION
 
-B<This is an experimental module for the experimental jQluster project.>
+B<This is an experimental module for the experimental jQluster project. jQluster project is still in progress. I will update the document when it's ready.>
 
 L<jQluster::Server::WebSocket> is a jQluster server implementation
 using simple WebSocket transport. It accepts WebSocket connections and

@@ -143,7 +143,7 @@ jQluster::Server - jQluster tranport server independent of underlying connection
 
 =head1 DESCRIPTION
 
-B<This is an experimental module for the experimental jQluster project.>
+B<This is an experimental module for the experimental jQluster project. jQluster project is still in progress. I will update the document when it's ready.>
 
 L<jQluster::Server> accepts connections from jQluster client nodes,
 receives messages from these nodes and distributes the messages to
