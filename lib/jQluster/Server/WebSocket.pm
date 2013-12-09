@@ -11,13 +11,67 @@ __END__
 
 =head1 NAME
 
-jQluster::Server::WebSocket - abstract
+jQluster::Server::WebSocket - jQluster server implementation using WebSocket transport
 
 =head1 SYNOPSIS
 
+In your app.psgi
+
+    use Plack::Builder;
+    use jQluster::Server::WebSocket;
+    
+    my $jq_server = jQluster::Server::WebSocket->new();
+    
+    builder {
+        mount "/jqluster", $jq_server->to_app;
+        mount "/", $your_app;
+    };
+
+Then, in your JavaScript code
+
+    $.jqluster.init("my_node_id", "ws://myhost.mydomain/jqluster");
+
+
 =head1 DESCRIPTION
 
+L<jQluster::Server::WebSocket> is a jQluster server implementation
+using simple WebSocket transport. It accepts WebSocket connections and
+distribute jQluster messages through the connections.
+
+L<jQluster::Server::WebSocket> creates a L<PSGI> application. You can
+use it as a stand-alone app or mount it together with your own app.
+
+Currently L<jQluster::Server::WebSocket> uses
+L<Plack::App::WebSocket>, so your L<PSGI> server must meet its
+requirements.
+
+=head1 CLASS METHODS
+
+=head2 $server = jQluster::Server::WebSocket->new()
+
+The constructor.
+
+=head1 OBJECT METHODS
+
+=head2 $psgi_app = $server->to_app()
+
+Create a L<PSGI> application object from the C<$server>.
+
+
 =head1 SEE ALSO
+
+=over
+
+=item L<jQluster::Server>
+
+jQluster server independent of connection implementations.
+
+=item L<Plack::App::WebSocket>
+
+WebSocket server implementation as a L<Plack> app.
+
+=back
+
 
 =head1 REPOSITORY
 
