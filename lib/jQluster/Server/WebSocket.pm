@@ -49,9 +49,25 @@ requirements.
 
 =head1 CLASS METHODS
 
-=head2 $server = jQluster::Server::WebSocket->new()
+=head2 $server = jQluster::Server::WebSocket->new(%args)
 
-The constructor.
+The constructor. Fields in C<%args> are
+
+=over
+
+=item C<logger> => CODE (optional, default: do nothing)
+
+A subroutine reference that the server calls when it wants to log
+something.
+
+The C<$logger> is called like
+
+    $logger->($level, $message)
+
+where C<$level> is a log level string such as "info", "warning",
+"error" etc.  C<$message> is the log message string.
+
+=back
 
 =head1 OBJECT METHODS
 
