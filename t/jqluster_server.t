@@ -1,6 +1,7 @@
 use strict;
 use warnings;
 use Test::More;
+use Test::Exception;
 
 BEGIN {
     use_ok("jQluster::Server");
@@ -68,6 +69,24 @@ sub check_server_logs {
         body => { error => undef, in_reply_to => "hoge" }
     });
     check_server_logs \@logs;
+}
+
+{
+    note("--- duplicate registration");
+    my ($s, $server_logs) = create_server();
+    my $alice = create_fake_connection();
+    $s->register(
+        unique_id => "alice",
+        message => register_message(1, "alice"),
+        sender => $alice->{sender}
+    );
+    dies_ok {
+        $s->register(
+            unique_id => "alice",
+            message => register_message(2, "alice"),
+            sender => $alice->{sender}
+        )
+    } "duplicate registration should throw an exception";
 }
 
 {
@@ -198,6 +217,13 @@ sub check_server_logs {
     is_deeply($cs[0]{log}, [], "connection 0 receives nothing because it is already unregistered");
     is_deeply($cs[1]{log}, [$message], "connection 1 receives the message because it is still registered");
     check_server_logs $server_logs;
+}
+
+{
+    note("--- unregister non-existent node");
+    my ($s, $server_logs) = create_server();
+    $s->unregister("hogehoge");
+    is_deeply($server_logs, [], "unregister non-existent node does nothing. No logs.");
 }
 
 done_testing();

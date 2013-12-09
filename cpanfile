@@ -4,6 +4,7 @@ requires "Data::UUID";
 
 on 'test' => sub {
     requires 'Test::More' => "0";
+    requires "Test::Exception";
 };
 
 on 'configure' => sub {

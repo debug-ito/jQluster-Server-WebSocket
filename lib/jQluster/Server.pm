@@ -46,6 +46,9 @@ sub register {
         sender => $args{sender},
         remote_id => $args{message}{from}
     );
+    if(exists $self->{registry}{$reg_entry{unique_id}}) {
+        croak "Duplicate registration for unique ID: $reg_entry{unique_id}";
+    }
     $self->{registry}{$reg_entry{unique_id}} = \%reg_entry;
     $self->{uids_for_remote_id}{$reg_entry{remote_id}}{$reg_entry{unique_id}} = 1;
     $self->_log(info => "Accept registration: unique_id = $reg_entry{unique_id}, remote_id = $reg_entry{remote_id}");
