@@ -7,6 +7,11 @@ requires "JSON";
 requires "Scalar::Util";
 requires "Try::Tiny";
 
+requires "Plack::Runner";
+requires "Getopt::Long";
+requires "Pod::Usage";
+requires "Twiggy";
+
 on 'test' => sub {
     requires 'Test::More' => "0";
     requires "Test::Exception";
