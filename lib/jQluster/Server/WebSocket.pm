@@ -34,6 +34,8 @@ Then, in your JavaScript code
 
 =head1 DESCRIPTION
 
+B<This is an experimental module for the experimental jQluster project.>
+
 L<jQluster::Server::WebSocket> is a jQluster server implementation
 using simple WebSocket transport. It accepts WebSocket connections and
 distribute jQluster messages through the connections.

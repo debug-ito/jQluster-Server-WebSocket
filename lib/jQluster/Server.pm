@@ -5,15 +5,15 @@ use warnings;
 use Carp;
 use Data::UUID;
 
+our $VERSION = "0.01";
+
 sub new {
     my ($class, %args) = @_;
     my $self = bless {
         id_generator => Data::UUID->new,
         registry => {},
         uids_for_remote_id => {},
-        logger => $args{logger} // sub {
-            warn(__PACKAGE__ . ": $_[0]: $_[1]\n");
-        }
+        logger => $args{logger} // sub { },
     }, $class;
     return $self;
 }
@@ -140,17 +140,89 @@ jQluster::Server - jQluster tranport server independent of underlying connection
 
 =head1 DESCRIPTION
 
-L<jQluster::Server> accepts connections from jQluster nodes, receives
-messages from these nodes and distributes the messages to appropriate
-destination nodes.
+B<This is an experimental module for the experimental jQluster project.>
+
+L<jQluster::Server> accepts connections from jQluster client nodes,
+receives messages from these nodes and distributes the messages to
+appropriate destination nodes.
 
 L<jQluster::Server> is independent of connection implementations. It
 just tells the destination connection's sender routine that it has
 incoming messages to the connection.
 
-=head1 METHODS
 
-TBW. See the L</SYNOPSIS>.
+=head1 CLASS METHODS
+
+=head2 $server = jQluster::Server->new(%args)
+
+The constructor. Fields in C<%args> are:
+
+=over
+
+=item C<logger> => CODE (optional, default: log nothing)
+
+A subroutine reference that is called when the C<$server> wants to log
+something.
+
+The C<$logger> is called like
+
+    $logger->($level, $message)
+
+where C<$level> is a log level string such as "info", "warning",
+"error" etc.  C<$message> is the log message string.
+
+=back
+
+=head1 OBJECT METHODS
+
+=head2 $server->register(%args)
+
+Register a new jQluster connection to a client node.
+
+Fields in C<%args> are:
+
+=over
+
+=item C<unique_id> => ID (mandatory)
+
+The ID for the new connection. The ID must be unique within the
+C<$server>.  If you try to register an ID that is already registered,
+it croaks.
+
+=item C<message> => jQluster MESSAGE HASH (mandatory)
+
+A jQluster message for registration.  The message is usually created
+by a jQluster client node.
+
+=item C<sender> => CODE (mandatory)
+
+A subroutine reference that is called when the C<$server> sends a
+message to this connection.
+
+The C<$sender> is called like
+
+    $sender->($jqluster_message)
+
+where C<$jqluster_message> is a jQluster message object. It's a plain
+hash-ref. It's up to the C<$sender> how to deliver the message to the
+client node.
+
+=back
+
+=head2 $server->distribute($message)
+
+Distirbute the given jQluster message to destination nodes.
+
+C<$message> is a jQluster message object. It's a plain hash-ref.
+
+
+=head2 $server->unregister($unique_id)
+
+Unregister a connection to a client node.
+
+C<$unique_id> is the unique ID you give when calling C<register()>
+method.  If C<$unique_id> is not registered, it does nothing.
+
 
 =head1 AUTHOR
 
