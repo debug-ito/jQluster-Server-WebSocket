@@ -12,7 +12,7 @@ sub new {
     my $self = bless {
         id_generator => Data::UUID->new,
         registry => {},
-        uids_for_remote_id => {},
+        uids_for_remote_node_id => {},
         logger => $args{logger} // sub { },
     }, $class;
     return $self;
@@ -44,19 +44,19 @@ sub register {
     my %reg_entry = (
         unique_id => $args{unique_id},
         sender => $args{sender},
-        remote_id => $args{message}{from}
+        remote_node_id => $args{message}{from}
     );
     if(exists $self->{registry}{$reg_entry{unique_id}}) {
         croak "Duplicate registration for unique ID: $reg_entry{unique_id}";
     }
     $self->{registry}{$reg_entry{unique_id}} = \%reg_entry;
-    $self->{uids_for_remote_id}{$reg_entry{remote_id}}{$reg_entry{unique_id}} = 1;
-    $self->_log(info => "Accept registration: unique_id = $reg_entry{unique_id}, remote_id = $reg_entry{remote_id}");
+    $self->{uids_for_remote_node_id}{$reg_entry{remote_node_id}}{$reg_entry{unique_id}} = 1;
+    $self->_log(info => "Accept registration: unique_id = $reg_entry{unique_id}, remote_node_id = $reg_entry{remote_node_id}");
 
     $self->distribute({
         message_id => $self->_generate_message_id(),
         message_type => "register_reply",
-        from => undef, to => $reg_entry{remote_id},
+        from => undef, to => $reg_entry{remote_node_id},
         body => { error => undef, in_reply_to => $args{message}{message_id} }
     });
 }
@@ -65,8 +65,8 @@ sub unregister {
     my ($self, $unique_id) = @_;
     my $entry = delete $self->{registry}{$unique_id};
     return if !defined($entry);
-    delete $self->{uids_for_remote_id}{$entry->{remote_id}}{$entry->{unique_id}};
-    $self->_log(info => "Unregister: unique_id = $unique_id, remote_id = $entry->{remote_id}");
+    delete $self->{uids_for_remote_node_id}{$entry->{remote_node_id}}{$entry->{unique_id}};
+    $self->_log(info => "Unregister: unique_id = $unique_id, remote_node_id = $entry->{remote_node_id}");
 }
 
 my %REPLY_MESSAGE_TYPE_FOR = (
@@ -95,7 +95,7 @@ sub distribute {
     if(!defined($to)) {
         return;
     }
-    my $uid_map = $self->{uids_for_remote_id}{$to};
+    my $uid_map = $self->{uids_for_remote_node_id}{$to};
     if(!defined($uid_map) || !%$uid_map) {
         $self->_try_reply_error_to($message, "Target remote node ($to) does not exist.");
         return;
