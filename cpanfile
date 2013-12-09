@@ -1,7 +1,11 @@
 
 requires "Carp";
 requires "Data::UUID";
+requires "Plack::Component";
+requires "Plack::App::WebSocket";
 requires "JSON";
+requires "Scalar::Util";
+requires "Try::Tiny";
 
 on 'test' => sub {
     requires 'Test::More' => "0";

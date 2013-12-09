@@ -1,8 +1,91 @@
 package jQluster::Server::WebSocket;
 use strict;
 use warnings;
+use base ("Plack::Component");
+use jQluster::Server;
+use Plack::App::WebSocket;
+use Scalar::Util qw(weaken refaddr);
+use Try::Tiny;
+use JSON qw(decode_json encode_json);
 
 our $VERSION = "0.01";
+
+sub new {
+    my ($class, @args) = @_;
+    my $self = $class->SUPER::new(@args);
+    $self->{logger} ||= sub {};
+    $self->{jqluster} = jQluster::Server->new(
+        logger => $self->{logger}
+    );
+    $self->{websocket_app} = $self->_create_websocket_app();
+    return $self;
+}
+
+sub call {
+    my ($self, $env) = @_;
+    return $self->{websocket_app}->call($env);
+}
+
+sub _log {
+    my ($self, $level, $msg) = @_;
+    $self->{logger}->($level, $msg);
+}
+
+sub _create_websocket_app {
+    my ($self) = @_;
+    weaken $self;
+    my $app = Plack::App::WebSocket->new(on_establish => sub {
+        my ($conn) = @_;
+        return if !$self;
+        $conn->on(message => sub {
+            my ($conn, $message_str) = @_;
+            return if !$self;
+            try {
+                my $message = decode_json($message_str);
+                if(!ref($message) || ref($message) ne "HASH") {
+                    die("Message is not a HASH");
+                }
+                if(!defined($message->{message_type})) {
+                    die("message_type is not defined in the message");
+                }
+                if($message->{message_type} eq "register") {
+                    $self->_register($conn, $message);
+                }else {
+                    $self->{jqluster}->distribute($message);
+                }
+            }catch {
+                my $e = shift;
+                $self->_log("error", $e);
+            }
+        });
+        $conn->on(finish => sub {
+            return if !$self;
+            $self->{jqluster}->unregister(refaddr($conn));
+            undef $conn;
+        });
+    });
+    return $app;
+}
+
+sub _register {
+    my ($self, $conn, $message) = @_;
+    weaken $self;
+    $self->{jqluster}->register(
+        unique_id => refaddr($conn),
+        message => $message,
+        sender => sub {
+            my ($send_message) = @_;
+            try {
+                $conn->send(encode_json($send_message));
+            }catch {
+                my $e = shift;
+                return !$self;
+                $self->_log("error", "send error: $e");
+            }
+        }
+    );
+}
+
 
 1;
 __END__

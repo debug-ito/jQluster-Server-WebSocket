@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use Test::More;
  
-plan tests => 1;
+plan tests => 2;
  
 BEGIN {
     use_ok( 'jQluster::Server::WebSocket' );
