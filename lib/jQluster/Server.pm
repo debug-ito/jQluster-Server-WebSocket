@@ -5,7 +5,7 @@ use warnings;
 use Carp;
 use Data::UUID;
 
-our $VERSION = "0.01";
+our $VERSION = "0.02";
 
 sub new {
     my ($class, %args) = @_;
