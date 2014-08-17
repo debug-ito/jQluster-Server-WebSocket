@@ -1,5 +1,9 @@
 Revision history for jQluster-Server-WebSocket
 
+0.03    2014-08-17
+        - No implementation change.
+        - Migrate to Module::Build::Prereqs::FromCPANFile.
+
 0.02    2014-01-26
         - No implementation change.
         - Update POD. Added link to jQluster github repository.

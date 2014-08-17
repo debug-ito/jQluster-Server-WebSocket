@@ -8,7 +8,7 @@ use Scalar::Util qw(weaken refaddr);
 use Try::Tiny;
 use JSON qw(decode_json encode_json);
 
-our $VERSION = "0.02";
+our $VERSION = "0.03";
 
 sub new {
     my ($class, @args) = @_;
